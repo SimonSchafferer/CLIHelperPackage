@@ -1,3 +1,5 @@
+#--split CLIApplication
+
 #'@title CLIApplication Virtual Class
 #'@section Slots: 
 #'  \describe{
@@ -71,10 +73,12 @@ setMethod("getOutputFlag",signature(object="CLIApplication"),function(object) {
 })
 
 
+#--split Bowtie2_CLI
 #################################################
 #     General generic function definitions that are implemented in several subclasses!
 #################################################
 
+#'@include CLIApplication
 #'@title Bowtie2_CLI
 #'@section Slots: 
 #'  \describe{
@@ -180,7 +184,9 @@ setMethod("generateCommandResult",signature(object="Bowtie2_CLI"),function(objec
   return(res)
 })
 
+#--split Bowtie2TophatIon_CLI
 
+#'@include Bowtie2_CLI
 #'@title Bowtie2TophatIon_CLI
 #'@section Slots: 
 #'  \describe{
@@ -282,6 +288,9 @@ setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),funct
     return(res)
   } )
 
+
+#--split OutResultReference
+
 #'@title OutResultReference Virtual Class
 #'@section Slots: 
 #'  \describe{
@@ -300,7 +309,8 @@ setMethod("getOutResultName",signature(object="OutResultReference"),function(obj
   slot(object, "outResultName")
 })
 
-
+#--split FilesOutput
+#'@include OutResultReference
 #'@title FilesOutput
 #'@section Slots: 
 #'  \describe{
@@ -309,6 +319,10 @@ setMethod("getOutResultName",signature(object="OutResultReference"),function(obj
 #' @name FilesOutput-class
 #' @export
 setClass("FilesOutput", contains = "OutResultReference")
+
+#--split FoldersOutput
+
+#'@include OutResultReference
 #'@title FoldersOutput
 #'@section Slots: 
 #'  \describe{
@@ -351,6 +365,8 @@ OutResultReference = function(outResultName){
     stop("Not a file or folder!")
   } 
 } 
+
+#--split CmdGenResult
 
 #'@title CmdGenResult
 #'@section Slots: 
@@ -465,6 +481,8 @@ setMethod("executeCommandResult",signature(object="CmdGenResult", testing="logic
 })
 
 
+#--split CmdGenResultExec
+
 #'@title CmdGenResultExec
 #'@section Slots: 
 #'  \describe{
@@ -519,8 +537,8 @@ setMethod("getExecLogFormatted",signature(object="CmdGenResultExec"),function(ob
 
 
 
-
-
+#--split Cutadapt_CLI
+#'@include CLIApplication
 #'@title Cutadapt_CLI
 #'@section Slots: 
 #'  \describe{
@@ -571,7 +589,9 @@ setMethod("generateCommandResult",signature(object="Cutadapt_CLI"),function(obje
   return(res)
 })
 
+#--split HTSeqCount_CLI
 
+#'@include CLIApplication
 #'@title HTSeqCount_CLI
 #'@section Slots: 
 #'  \describe{
@@ -633,6 +653,9 @@ setMethod("generateCommandResult",signature(object="HTSeqCount_CLI"),function(ob
 
 
 
+#--split MultiBamCov_CLI
+
+#'@include CLIApplication
 #'@title MultiBamCov_CLI
 #'@section Slots: 
 #'  \describe{
@@ -712,6 +735,9 @@ setMethod("generateCommandResult",signature(object="MultiBamCov_CLI"),function(o
 
 
 
+#--split Samtools_CLI
+
+#'@include CLIApplication
 #'@title Samtools_CLI
 #'@section Slots: 
 #'  \describe{
@@ -827,7 +853,9 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
 
 })
 
+#--split Tophat2_CLI
 
+#'@include CLIApplication
 #'@title Tophat2_CLI
 #'@section Slots: 
 #'  \describe{
