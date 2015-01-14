@@ -6,7 +6,7 @@
 \title{Constructor method for Tophat2_CLI}
 \usage{
 Tophat2_CLI(inFilePath, inFileNames, cliParams, outputFlag, outFilePath,
-  gtfFilePath, bowtieIndexFilePath)
+  bowtieIndexFilePath)
 }
 \arguments{
 \item{inFilePath}{(inFileNames may also be specified otherwise they will be fetched by list.files)}

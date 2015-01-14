@@ -8,13 +8,9 @@
 CmdGenResultExec(cmdGenResult, execLog)
 }
 \arguments{
-\item{CLIApplication}{}
+\item{execLog}{}
 
-\item{OutResultReference}{}
-
-\item{commands}{}
-
-\item{executed}{}
+\item{CmdGenResult}{}
 }
 \value{
 \code{"CmdGenResultExec"}

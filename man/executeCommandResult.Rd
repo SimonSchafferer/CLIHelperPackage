@@ -5,7 +5,7 @@
 \alias{executeCommandResult}
 \title{Executes the commands of a executeCommandResult object}
 \usage{
-executeCommandResult(object)
+executeCommandResult(object, testing)
 }
 \arguments{
 \item{\code{"CmdGenResult"}}{}

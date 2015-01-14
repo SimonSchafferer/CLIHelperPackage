@@ -5,7 +5,7 @@
 \alias{CmdGenResult}
 \title{Constructor method for CmdGenResult}
 \usage{
-CmdGenResult(CLIApplication, OutResultReference, commands, executed)
+CmdGenResult(CLIApplication, OutResultReference, commands)
 }
 \arguments{
 \item{CLIApplication}{}
@@ -13,8 +13,6 @@ CmdGenResult(CLIApplication, OutResultReference, commands, executed)
 \item{OutResultReference}{}
 
 \item{commands}{}
-
-\item{executed}{}
 }
 \value{
 \code{"CmdGenResult"}

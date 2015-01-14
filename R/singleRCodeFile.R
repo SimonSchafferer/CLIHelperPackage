@@ -164,17 +164,18 @@ setMethod("generateCommandResult",signature(object="Bowtie2_CLI"),function(objec
   
   allFilesOut = paste0( sub("\\.fastq$","",allFiles), getOutputFlag(object), ".fastq")
   
-  dir.create(getOutFilePath(object))
+#   dir.create(getOutFilePath(object))
+  cmd2 = paste0("mkdir ", getOutFilePath(object)) #if only executed in terminal!
   
   if( getMatepairFileNames(object)[1] == "" ){
-    cmd2 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", allFiles, " -S ",
+    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", allFiles, " -S ",
                   file.path(getOutFilePath(object), allFilesOut) )
   } else{
-    cmd2 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -1 ", allFiles,
+    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -1 ", allFiles,
                  " -2 ",getMatepairFileNames(object), " -S ", file.path(getOutFilePath(object), allFilesOut) )
   }
                 
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2, cmd3))
   
   return(res)
 })
@@ -268,14 +269,16 @@ setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),funct
     inFP = getInFilePath(object)
     
     cmd1 = paste0("cd ",inFP)
-    outFile = paste0( getOutFileNames(object), getOutputFlag(object), ".bam")
-    
+    outFile = paste0( getOutFileNames(object), getOutputFlag(object), ".bam")  
+  
     cmd2 = paste0("bam2fastq -o unmapped.fastq unmapped.bam")
     cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", "unmapped.fastq", 
-                  " | samtools view -uhS -F4 - | samtools sort - unmapped_remap java -jar ", file.path( getPathToPicardTools(object), "MergeSamFiles.jar"),
-                  " USE_THREADING=true MSD=true AS=true I=accepted_hits.bam I=unmapped_remap.bam O=",outFile)
+                  " | samtools view -uhS -F4 - | samtools sort - unmapped_remap")
+    
+    cmd4 = paste0("java -jar ", file.path( getPathToPicardTools(object), "MergeSamFiles.jar"),
+                  " USE_THREADING=true MSD=true AS=true I=accepted_hits.bam I=unmapped_remap.bam O=",file.path(getOutFilePath(object), outFile) )
         
-    res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFile), commands = c(cmd1, cmd2, cmd3))
+    res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object), outFile)), commands = c(cmd1, cmd2, cmd3, cmd4))
     return(res)
   } )
 
@@ -287,6 +290,17 @@ setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),funct
 #' @name OutResultReference-class
 #' @export
 setClass("OutResultReference", representation(outResultName = "character", "VIRTUAL"))
+
+#' @title Accessor getOutResultName
+#' @export
+#' @docType methods
+#' @return outResultName
+setGeneric("getOutResultName", function(object){standardGeneric("getOutResultName")})
+setMethod("getOutResultName",signature(object="OutResultReference"),function(object) {
+  slot(object, "outResultName")
+})
+
+
 #'@title FilesOutput
 #'@section Slots: 
 #'  \describe{
@@ -413,16 +427,31 @@ CmdGenResult = function(CLIApplication,OutResultReference,commands ){
 #' @param \code{"CmdGenResult"}
 #' @export
 #' @docType methods
-setGeneric("executeCommandResult", function( object ) { standardGeneric("executeCommandResult") })
-setMethod("executeCommandResult",signature(object="CmdGenResult"), function(object) {
+setGeneric("executeCommandResult", function( object, testing ) { 
+  
+  if(isClass(object,"CmdGenResult") & missing(testing)){
+    executeCommandResult(object=object, testing=FALSE)
+  } else if(isClass(object,"CmdGenResult")) {
+    executeCommandResult(object=object, testing=testing)
+  } else{
+    stop( paste("Function for class",class(object), "not defined!"))
+  }
+})
+
+setMethod("executeCommandResult",signature(object="CmdGenResult", testing="logical"), function(object, testing=FALSE) {
 #   message( paste0("Executing command:\n", getCommandLog(object)) )
     logs = lapply( getCommands(object), function(x){
       #setting the directory to the InputFilePath
       currWD = getwd()
-      setwd(getInFilePath(getCLIApplication(object = object)))
       message( paste0("Executing command:\n", x) )
       log = tryCatch({
-        system(x, intern = TRUE)
+        if(!testing){
+          setwd(getInFilePath(getCLIApplication(object = object)))
+          system(x, intern = TRUE)
+        } else{
+          message("Testing ... command is not executed!")
+          return(x)
+        }
       }, warning = function(w){
         warning(w)
       }, error = function(e){
@@ -533,10 +562,11 @@ setMethod("generateCommandResult",signature(object="Cutadapt_CLI"),function(obje
   cmd1 = paste0("cd ",getInFilePath(object))
   
   allFilesOut = paste0( sub("\\.fastq$","",allFiles) ,getOutputFlag(object), ".fastq")
-  dir.create(getOutFilePath(object))
-  cmd2 = paste0("cutadapt ", paste0(getCliParams(object),collapse=" "), " -o ", file.path(getOutFilePath(object), allFilesOut), " ", allFiles)
+#   dir.create(getOutFilePath(object))
+  cmd2 = paste0("mkdir ", getOutFilePath(object))
+  cmd3 = paste0("cutadapt ", paste0(getCliParams(object),collapse=" "), " -o ", file.path(getOutFilePath(object), allFilesOut), " ", allFiles)
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2, cmd3))
   
   return(res)
 })
@@ -592,9 +622,9 @@ setMethod("generateCommandResult",signature(object="HTSeqCount_CLI"),function(ob
   cmd1 = paste0("cd ",getInFilePath(object))
   
   outFN = paste0( sub( "\\..*$","",inFN), getOutputFlag(object) )
-  cmd2 = paste0( "htseq-count ", paste0(getCliParams(object),collapse=" "), " ", inFN, " ", getGffFile(object), " > ", outFN  )
+  cmd2 = paste0( "htseq-count ", paste0(getCliParams(object),collapse=" "), " ", inFN, " ", getGffFile(object), " > ", file.path(getOutFilePath(object),outFN)  )
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
   
   return(res)
   
@@ -672,9 +702,9 @@ setMethod("generateCommandResult",signature(object="MultiBamCov_CLI"),function(o
   
   outFN = paste0( sub( "\\..*$","",inFNs[1]), getOutputFlag(object) )
   cmd2 = paste0( "bedtools multicov ", paste0(getCliParams(object),collapse=" "), " -bams ", paste0(inFNs, collapse=" "), " -",
-                 getAnnotationType(object)," ", getAnnotationFileMB(object), " > ", outFN  )
+                 getAnnotationType(object)," ", getAnnotationFileMB(object), " > ",  file.path(getOutFilePath(object),outFN)  )
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
   
   return(res)
   
@@ -791,7 +821,7 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
          stop("Samtools application not recognized (supported: view, sort, index)")
          })
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
   
   return(res)
 
@@ -806,21 +836,11 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
 #'    \item{\code{slot3}:}{cliParams \code{"character"}}
 #'    \item{\code{slot4}:}{outFilePath \code{"character"}}
 #'    \item{\code{slot5}:}{outputFlag \code{"character"}}
-#'    \item{\code{slot6}:}{gtfFilePath \code{"character"}}
-#'    \item{\code{slot7}:}{bowtieIndexFilePath \code{"character"}}
+#'    \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
 #'  }
 #' @name Tophat2_CLI-class
 #' @export
-setClass("Tophat2_CLI", contains = "CLIApplication", representation(gtfFilePath = "character", bowtieIndexFilePath="character") )
-
-#' @title Accessor getGTFFilePath
-#' @export
-#' @docType methods
-#' @return gtfFilePath
-setGeneric("getGTFFilePath", function(object) standardGeneric("getGTFFilePath"))
-setMethod("getGTFFilePath",signature(object="Tophat2_CLI"),function(object) {
-  slot(object, "gtfFilePath")
-})
+setClass("Tophat2_CLI", contains = "CLIApplication", representation(bowtieIndexFilePath="character") )
 
 #' @title Accessor getBowtieIndexFilePath Tophat2
 #' @export
@@ -834,24 +854,24 @@ setMethod("getBowtieIndexFilePath",signature(object="Tophat2_CLI"),function(obje
 #' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
 #' @export
 #' @docType methods
-setGeneric("Tophat2_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath,gtfFilePath,bowtieIndexFilePath){standardGeneric("Tophat2_CLI")})
+setGeneric("Tophat2_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath,bowtieIndexFilePath){standardGeneric("Tophat2_CLI")})
 setMethod("Tophat2_CLI", signature( inFilePath="character", inFileNames="missing", cliParams="character", 
-                                    outputFlag="character", outFilePath="character", gtfFilePath="character", 
+                                    outputFlag="character", outFilePath="character",  
                                     bowtieIndexFilePath="character"), 
-                                    function(inFilePath, cliParams, outputFlag, outFilePath,gtfFilePath, bowtieIndexFilePath){
+                                    function(inFilePath, cliParams, outputFlag, outFilePath, bowtieIndexFilePath){
                                       inFileNames = list.files(path = inFilePath, pattern = ".*\\.fastq$")
                                       return(
                                         new("Tophat2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                                            outputFlag=outputFlag, outFilePath=outFilePath, gtfFilePath=gtfFilePath, bowtieIndexFilePath=bowtieIndexFilePath)
+                                            outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath)
                                       )
                                     })
 setMethod("Tophat2_CLI", signature( inFilePath="character", inFileNames="character", cliParams="character", 
-                                    outputFlag="character", outFilePath="character", gtfFilePath="character", 
+                                    outputFlag="character", outFilePath="character",  
                                     bowtieIndexFilePath="character"), 
-          function(inFilePath,inFileNames, cliParams, outputFlag, outFilePath,gtfFilePath, bowtieIndexFilePath){
+          function(inFilePath,inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath){
             return(
               new("Tophat2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                  outputFlag=outputFlag, outFilePath=outFilePath, gtfFilePath=gtfFilePath, bowtieIndexFilePath=bowtieIndexFilePath)
+                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath)
             )
           })
 
@@ -874,24 +894,24 @@ setMethod("generateCommandResult",signature(object="Tophat2_CLI"),function(objec
   
   #preparing output files
   sampleOutDir = paste0( paste0( sub("\\.fastq$","",inFN),getOutputFlag(object))  )
-  
+  sampleOutDir = file.path(getOutFilePath(object), sampleOutDir)
   #generating the tophat base directory
   outfilepath = getOutFilePath(object)
-  dir.create(outfilepath)
-  setwd(outfilepath)
+#   dir.create(outfilepath)
+#   setwd(outfilepath)
   
-  cmd1 = paste("cd ", outfilepath)
+  cmd1 = paste("mkdir", outfilepath) #if only executed in terminal!
+  cmd2 = paste("cd ", outfilepath)
   
   #generating the tophat command
-  cmd2 = paste0( "tophat2 ", paste0(getCliParams(object), collapse=" "), 
-                 " --output-dir ", sampleOutDir, " --GTF ", 
-                 getGTFFilePath(object), " ", getBowtieIndexFilePath(object), " ", file.path(inFP,inFN) )
+  cmd3 = paste0( "tophat2 ", paste0(getCliParams(object), collapse=" "), 
+                 " --output-dir ", sampleOutDir, " ", getBowtieIndexFilePath(object), " ", file.path(inFP,inFN) )
   
   #IN FILENAME UND BOWTIE INDEX PATH FEHLEN!
   
   #   tophat2 --num-threads 12 --keep-fasta-order --output-dir /home/simon/PHDStudies/RNA-Seq/IonProton/MSA_LusserWenning/SampleAnalysis/tophat-out_sampleAnalysis --GTF /home/simon/dbsOfflineUse/GTF_repos/Mus_musculus.GRCm38.78_mod.gtf /home/simon/dbsOfflineUse/MusMusculus/Mouse_mm10_fasta/bowtie2/mm10 /home/simon/PHDStudies/RNA-Seq/IonProton/MSA_LusserWenning/SampleAnalysis/sampleFastq_larger20.fastq
 
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FoldersOutput(sampleOutDir), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FoldersOutput(sampleOutDir), commands = c(cmd1, cmd2, cmd3))
   
   return(res)
 })

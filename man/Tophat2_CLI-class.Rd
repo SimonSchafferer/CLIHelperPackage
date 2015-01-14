@@ -15,8 +15,7 @@ Tophat2_CLI
    \item{\code{slot3}:}{cliParams \code{"character"}}
    \item{\code{slot4}:}{outFilePath \code{"character"}}
    \item{\code{slot5}:}{outputFlag \code{"character"}}
-   \item{\code{slot6}:}{gtfFilePath \code{"character"}}
-   \item{\code{slot7}:}{bowtieIndexFilePath \code{"character"}}
+   \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
  }
 }
 
