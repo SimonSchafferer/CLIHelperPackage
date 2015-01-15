@@ -425,7 +425,7 @@ setMethod("getCommands",signature(object="CmdGenResult"),function(object) {
 #' @return commands formatted
 setGeneric("getCommandLog", function(object) standardGeneric("getCommandLog"))
 setMethod("getCommandLog",signature(object="CmdGenResult"),function(object) {
-  paste0( getCommands(object),collapse="\n")
+  paste0(paste0( getCommands(object),collapse="\n"), "\n")
 })
 
 #' @title Constructor method for CmdGenResult
