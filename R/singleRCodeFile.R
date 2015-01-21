@@ -73,222 +73,6 @@ setMethod("getOutputFlag",signature(object="CLIApplication"),function(object) {
 })
 
 
-#--split Bowtie2_CLI
-#################################################
-#     General generic function definitions that are implemented in several subclasses!
-#################################################
-
-#'@include CLIApplication
-#'@title Bowtie2_CLI
-#'@section Slots: 
-#'  \describe{
-#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
-#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
-#'    \item{\code{slot3}:}{cliParams \code{"character"}}
-#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
-#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
-#'    \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
-#'    \item{\code{slot7}:}{matepairFileNames \code{"character"}}
-#'  }
-#' @name Bowtie2_CLI-class
-#' @export
-setClass("Bowtie2_CLI", contains = "CLIApplication", representation(bowtieIndexFilePath="character", matepairFileNames="character") )
-
-#' @title Accessor getBowtieIndexFilePath
-#' @export
-#' @docType methods
-#' @return bowtieIndexFilePath
-setGeneric("getBowtieIndexFilePath", function(object) standardGeneric("getBowtieIndexFilePath"))
-setMethod("getBowtieIndexFilePath",signature(object="Bowtie2_CLI"),function(object) {
-  slot(object, "bowtieIndexFilePath")
-})
-
-#' @title Accessor getMatepairFileNames
-#' @export
-#' @docType methods
-#' @return matepairFileNames
-setGeneric("getMatepairFileNames", function(object){standardGeneric("getMatepairFileNames")})
-setMethod("getMatepairFileNames",signature(object="Bowtie2_CLI"),function(object) {
-  slot(object, "matepairFileNames")
-})
-
-#' @title Constructor method for Bowtie2_CLI
-#' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
-#' @export
-#' @docType methods
-setGeneric("Bowtie2_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath, matepairFileNames){standardGeneric("Bowtie2_CLI")})
-
-setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="character", 
-                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="missing"), 
-         function(inFilePath, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames){
-           inFileNames = list.files(path = inFilePath, pattern = ".*\\.fastq$")
-           return(
-             new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                 outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath,matepairFileNames="")
-           )
-         })
-setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="character", 
-                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="character"), 
-          function(inFilePath, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames){
-            inFileNames = list.files(path = inFilePath, pattern = ".*\\.fastq$")
-            return(
-              new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath,matepairFileNames=matepairFileNames)
-            )
-          })
-
-setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
-                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="missing"), 
-           function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames ){
-             return(
-               new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                   outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames="")
-             )
-          })
-setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
-                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="character"), 
-          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames ){
-            return(
-              new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames=matepairFileNames)
-            )
-          })
-
-#' @title Generates the commands and possibly resulting files/folders of Bowtie2
-#' 
-#' @param Bowtie2_CLI
-#' @return CmdGenResult
-#' @rdname generateCommandResult-method
-#' @export
-setMethod("generateCommandResult",signature(object="Bowtie2_CLI"),function(object) { 
- #USAGE: bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
-  
-  allFiles = getInFileNames(object)
-  cmd1 = paste0("cd ",getInFilePath(object))
-  
-  allFilesOut = paste0( sub("\\.fastq$","",allFiles), getOutputFlag(object), ".fastq")
-  
-#   dir.create(getOutFilePath(object))
-  cmd2 = paste0("mkdir ", getOutFilePath(object)) #if only executed in terminal!
-  
-  if( getMatepairFileNames(object)[1] == "" ){
-    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", allFiles, " -S ",
-                  file.path(getOutFilePath(object), allFilesOut) )
-  } else{
-    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -1 ", allFiles,
-                 " -2 ",getMatepairFileNames(object), " -S ", file.path(getOutFilePath(object), allFilesOut) )
-  }
-                
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2, cmd3))
-  
-  return(res)
-})
-
-#--split Bowtie2TophatIon_CLI
-
-#'@include Bowtie2_CLI
-#'@title Bowtie2TophatIon_CLI
-#'@section Slots: 
-#'  \describe{
-#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
-#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
-#'    \item{\code{slot3}:}{cliParams \code{"character"}}
-#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
-#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
-#'    \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
-#'    \item{\code{slot7}:}{matepairFileNames \code{"character"}}
-#'    \item{\code{slot8}:}{outFileNames \code{"character"}}
-#'    \item{\code{slot9}:}{pathToPicardTools \code{"character"}}
-#'  }
-#' @name Bowtie2TophatIon_CLI-class
-#' @export
-setClass("Bowtie2TophatIon_CLI", contains = "Bowtie2_CLI", representation(outFileNames="character", pathToPicardTools="character"), prototype(outFileNames = "unmapped"))
-
-# @title Validity method for Bowtie2TophatIon_CLI
-# @name validityBowtie2TophatIon_CLI
-# @rdname validityBowtie2TophatIon_CLI
-# @export
-# @docType methods
-setValidity ("Bowtie2TophatIon_CLI",
-             function ( object ){
-               retval = NULL
-               if(length(getInFilePath(object)) > 1){ retval = "Multiple In File Paths (Tophat output directories are not allowed!)" }                          
-               if ( is.null(retval)){
-                 return(TRUE)
-               }
-               else{
-                 return(retval)
-               }
-             })
-
-#' @title Constructor method for Bowtie2TophatIon_CLI
-#' @export
-#' @docType methods
-setGeneric("Bowtie2TophatIon_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames, outFileNames, pathToPicardTools){standardGeneric("Bowtie2TophatIon_CLI")})
-setMethod("Bowtie2TophatIon_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="missing", 
-                                   outputFlag="character", outFilePath="missing", bowtieIndexFilePath="character", matepairFileNames="missing", 
-                                   outFileNames="missing", pathToPicardTools="missing"), 
-          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames,outFileNames, pathToPicardTools){
-                            
-            warning("Options are locked and input file name is set to unmapped, outfile is set to bam mate pairs are not supported!")
-            if(missing(outFileNames)){outFileNames = "aligned"}
-            if(missing(pathToPicardTools)){pathToPicardTools = "/usr/local/applications/picard-tools-1.77/"}
-            if(missing(outFilePath)){outFilePath = inFilePath; warning("outFilePath is set to inFilePath")}
-            
-            return(
-              new("Bowtie2TophatIon_CLI", inFilePath=inFilePath, inFileNames="unmapped", cliParams=c("--local","--very-sensitive-local","-p 8","--mm"), 
-                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames="", 
-                  outFileNames = outFileNames, pathToPicardTools=pathToPicardTools)
-            )
-          })
-
-#' @title Accessor getOutFileNames
-#' @export
-#' @docType methods
-#' @return outFileNames
-setGeneric("getOutFileNames", function(object){standardGeneric("getOutFileNames")})
-setMethod("getOutFileNames",signature(object="Bowtie2_CLI"),function(object) {
-  slot(object, "outFileNames")
-})
-
-#' @title Accessor getPathToPicardTools
-#' @export
-#' @docType methods
-#' @return pathToPicardTools
-setGeneric("getPathToPicardTools", function(object){standardGeneric("getPathToPicardTools")})
-setMethod("getPathToPicardTools",signature(object="Bowtie2_CLI"),function(object) {
-  slot(object, "pathToPicardTools")
-})
-
-
-#' @title Generates the commands and possibly resulting files/folders of Bowtie2 in combination with Tophat output for ion Torrent
-#' 
-#' @param Bowtie2TophatIon_CLI
-#' @return CmdGenResult
-#' @rdname generateCommandResult-method
-#' @export
-setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),function(object) { 
-  #USAGE: bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
-  #When Tophout2 results are created, bam2fastq is callled, then bowtie 2 is called, results are merged by picard tools MergeSamFiles
-  allFiles = getInFileNames(object)
-  
-    inFP = getInFilePath(object)
-    
-    cmd1 = paste0("cd ",inFP)
-    outFile = paste0( getOutFileNames(object), getOutputFlag(object), ".bam")  
-  
-    cmd2 = paste0("bam2fastq -o unmapped.fastq unmapped.bam")
-    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", "unmapped.fastq", 
-                  " | samtools view -uhS -F4 - | samtools sort - unmapped_remap")
-    
-    cmd4 = paste0("java -jar ", file.path( getPathToPicardTools(object), "MergeSamFiles.jar"),
-                  " USE_THREADING=true MSD=true AS=true I=accepted_hits.bam I=unmapped_remap.bam O=",file.path(getOutFilePath(object), outFile) )
-        
-    res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object), outFile)), commands = c(cmd1, cmd2, cmd3, cmd4))
-    return(res)
-  } )
-
-
 #--split OutResultReference
 
 #'@title OutResultReference Virtual Class
@@ -644,7 +428,7 @@ setMethod("generateCommandResult",signature(object="HTSeqCount_CLI"),function(ob
   outFN = paste0( sub( "\\..*$","",inFN), getOutputFlag(object) )
   cmd2 = paste0( "htseq-count ", paste0(getCliParams(object),collapse=" "), " ", inFN, " ", getGffFile(object), " > ", file.path(getOutFilePath(object),outFN)  )
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
   
   return(res)
   
@@ -652,6 +436,149 @@ setMethod("generateCommandResult",signature(object="HTSeqCount_CLI"),function(ob
 
 
 
+
+#--split IntersectBed_CLI
+#'@include CLIApplication
+#'@title IntersectBed_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'    \item{\code{slot6}:}{outFileName \code{"character"}}
+#'  }
+#' @name IntersectBed_CLI-class
+#' @export
+setClass("IntersectBed_CLI", contains = "CLIApplication", representation(outFileName="character"))
+
+#' @title Constructor method for IntersectBed_CLI
+#' @param inFilePath only one filename allowed!
+#' @export
+#' @docType methods
+setGeneric("IntersectBed_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, outFileName){standardGeneric("IntersectBed_CLI")})
+
+setMethod("IntersectBed_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                    outputFlag="character", outFilePath="character", outFileName="character"), function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, 
+                                                                                               outFileName ){
+                                      return(new("IntersectBed_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,
+                                                 outFilePath=outFilePath, outFileName=outFileName))
+                                    })
+
+#' @title Accessor getOutFileName
+#' @export
+#' @docType methods
+#' @return outFileName
+setGeneric("getOutFileName", function(object){standardGeneric("getOutFileName")})
+setMethod("getOutFileName",signature(object="IntersectBed_CLI"),function(object) {
+  slot(object, "outFileName")
+})
+
+#' @title Generates the commands and possibly resulting files of linux sort command IntersectBed_CLI
+#' 
+#' @param IntersectBed_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="IntersectBed_CLI"),function(object) { 
+  
+  if( length(getInFileNames(object)) > 2 ){
+    message("First File will be taken as a and all others as b")
+  } else if( length(getInFileNames(object)) < 2 ){
+    stop("Please provide at least two files as input!")
+  } 
+
+  inFN_a = getInFileNames(object)[1]
+  inFN_b = getInFileNames(object)[-1]
+    
+  if( length(getInFilePath(object)) == 1  ){
+    message("All files have to be present in the inFilePath directory!")
+    inFN_a_path = getInFilePath(object)
+    inFN_b_path = getInFilePath(object)
+  } else if( length(getInFilePath(object)) != length(getInFileNames(object)) ){
+    stop("Please provide the same number of paths to the input files as input file names")
+  } else{
+    inFN_a_path = getInFilePath(object)[1]
+    inFN_b_path = getInFilePath(object)[-1]
+  }
+  
+  cmd1 = paste0("cd ",getInFilePath(object))
+  
+  inFNtrimmed = sub("\\..+$","",inFN_a)
+  inFilending = sub( inFNtrimmed, "", inFN_a  )
+  
+  cmd2 = paste0( "mkdir ", getOutFilePath(object) )
+  
+  outFN = paste0( getOutFileName(object), getOutputFlag(object), inFilending)
+  
+  cmd3 = paste0( "intersectBed ", getCliParams(object), " -a ", file.path(inFN_a_path, inFN_a), " -b ", 
+                 paste0( file.path(inFN_b_path, inFN_b), collapse=" "), " > ", file.path(getOutFilePath(object), outFN)  )
+  
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2, cmd3))
+  
+  return(res)
+})
+
+
+#--split MergeBedFile_CLI
+#'@include CLIApplication
+#'@title MergeBedFile_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'  }
+#' @name MergeBedFile_CLI-class
+#' @export
+setClass("MergeBedFile_CLI", contains = "CLIApplication")
+
+
+#' @title Constructor method for MergeBedFile_CLI
+#' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
+#' @export
+#' @docType methods
+setGeneric("MergeBedFile_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath){standardGeneric("MergeBedFile_CLI")})
+
+setMethod("MergeBedFile_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                    outputFlag="character", outFilePath="character"), function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath ){
+                                      return(new("MergeBedFile_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,outFilePath=outFilePath))
+                                    })
+setMethod("MergeBedFile_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
+                                    outputFlag="character", outFilePath="character"), function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath ){
+                                      cliParams = "-s -c 4,5,6 -o mean,mean,distinct"
+                                      return(new("MergeBedFile_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,outFilePath=outFilePath))
+                                    })
+
+#' @title Generates the commands and possibly resulting files/folders of Cutadapt
+#' 
+#' @param MergeBedFile_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="MergeBedFile_CLI"),function(object) { 
+  
+  if( length(getInFileNames(object)) > 1 ){
+    warning("More than one input file given, using the first one!")
+  }
+  
+  inFN = getInFileNames(object)[1]
+  cmd1 = paste0("cd ",getInFilePath(object))
+  
+  inFNtrimmed = sub("\\..+$","",inFN)
+  inFilending = sub( inFNtrimmed, "", inFN  )
+  outFN = paste0( inFNtrimmed, getOutputFlag(object), inFilending)
+  
+  cmd2 = paste0( "sort -k1,1 -k2,2n ", file.path(getInFilePath(object), getInFileNames(object) ), " | ", 
+                 "mergeBed ", " -i stdin ", getCliParams(object), " | sort -k1,1 -k2,2n > ", file.path(getOutFilePath(object), outFN) )
+
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  
+  return(res)
+})
 
 #--split MultiBamCov_CLI
 
@@ -723,11 +650,11 @@ setMethod("generateCommandResult",signature(object="MultiBamCov_CLI"),function(o
   inFNs = getInFileNames(object)
   cmd1 = paste0("cd ",getInFilePath(object))
   
-  outFN = paste0( sub( "\\..*$","",inFNs[1]), getOutputFlag(object) )
+  outFN = paste0( gsub(".*/","",sub( "\\..*$","",inFNs[1])), getOutputFlag(object) )
   cmd2 = paste0( "bedtools multicov ", paste0(getCliParams(object),collapse=" "), " -bams ", paste0(inFNs, collapse=" "), " -",
                  getAnnotationType(object)," ", getAnnotationFileMB(object), " > ",  file.path(getOutFilePath(object),outFN)  )
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
   
   return(res)
   
@@ -847,11 +774,381 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
          stop("Samtools application not recognized (supported: view, sort, index)")
          })
   
-  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(file.path(getOutFilePath(object),outFN)), commands = c(cmd1, cmd2))
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
   
   return(res)
 
 })
+
+#--split BamToBed_CLI
+
+#'@include Samtools_CLI
+#'@title BamToBed_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'    \item{\code{slot6}:}{outputFormat \code{"character"}}
+#'  }
+#' @name BamToBed_CLI-class
+#' @export
+setClass("BamToBed_CLI", contains = "CLIApplication", representation(outputFormat="character"))
+
+
+#' @title Constructor method for BamToBed_CLI
+#' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
+#' @export
+#' @docType methods
+setGeneric("BamToBed_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, outputFormat){standardGeneric("BamToBed_CLI")})
+
+setMethod("BamToBed_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                    outputFlag="character", outFilePath="character", outputFormat="character"), 
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, outputFormat ){
+                                      return(new("BamToBed_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,
+                                                 outFilePath=outFilePath, outputFormat=outputFormat))
+                                    })
+#' @title Accessor getOutputFormat
+#' @export
+#' @docType methods
+#' @return outputFormat
+setMethod("getOutputFormat", signature(object="BamToBed_CLI"), function(object){
+  slot(object, "outputFormat")
+})
+
+#' @title Generates the commands and possibly resulting files/folders of BamToBed_CLI
+#' 
+#' @param BamToBed_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="BamToBed_CLI"),function(object) { 
+  
+  if( length(getInFileNames(object)) > 1 ){
+    warning("More than one input file given, using the first one!")
+  }
+  
+  inFN = getInFileNames(object)[1]
+  cmd1 = paste0("cd ",getInFilePath(object))
+  
+  inFNtrimmed = sub("\\..+$","",inFN)
+  outFN = paste0( inFNtrimmed, getOutputFlag(object),".", getOutputFormat(object))
+  
+  cmd2 = paste0( "bamToBed ", getCliParams(object)," -i ", file.path(getInFilePath(object), getInFileNames(object) ),
+                 " > ", file.path(getOutFilePath(object), outFN) )
+  
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  
+  return(res)
+})
+
+#--split SortFile_CLI
+#'@include CLIApplication
+#'@title SortFile_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'  }
+#' @name SortFile_CLI-class
+#' @export
+setClass("SortFile_CLI", contains = "CLIApplication")
+
+#' @title Constructor method for SortFile_CLI
+#' @param inFilePath only one filename allowed!
+#' @export
+#' @docType methods
+setGeneric("SortFile_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath){standardGeneric("SortFile_CLI")})
+
+setMethod("SortFile_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                    outputFlag="character", outFilePath="character"), function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath ){
+                                      return(new("SortFile_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,outFilePath=outFilePath))
+                                    })
+setMethod("SortFile_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
+                                    outputFlag="character", outFilePath="character"), function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath ){
+                                      cliParams = "-k1,1 -k2,2n"
+                                      return(new("SortFile_CLI", inFilePath=inFilePath, inFileNames=inFileNames,  cliParams=cliParams, outputFlag=outputFlag,outFilePath=outFilePath))
+                                    })
+
+#' @title Generates the commands and possibly resulting files of linux sort command SortFile_CLI
+#' 
+#' @param SortFile_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="SortFile_CLI"),function(object) { 
+  
+  if( length(getInFileNames(object)) > 1 ){
+    warning("More than one input file given, using the first one!")
+  }
+  
+  inFN = getInFileNames(object)[1]
+  cmd1 = paste0("cd ",getInFilePath(object))
+  
+  inFNtrimmed = sub("\\..+$","",inFN)
+  inFilending = sub( inFNtrimmed, "", inFN  )
+  
+  outFN = paste0( inFNtrimmed, getOutputFlag(object), inFilending)
+  
+  cmd2 = paste0( "sort ", getCliParams(object), " ", file.path(getInFilePath(object), getInFileNames(object) ), " > ", file.path(getOutFilePath(object), outFN)   )
+  
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFN), commands = c(cmd1, cmd2))
+  
+  return(res)
+})
+#--split Bowtie2_CLI
+#################################################
+#     General generic function definitions that are implemented in several subclasses!
+#################################################
+
+#'@include CLIApplication
+#'@title Bowtie2_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'    \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
+#'    \item{\code{slot7}:}{matepairFileNames \code{"character"}}
+#'  }
+#' @name Bowtie2_CLI-class
+#' @export
+setClass("Bowtie2_CLI", contains = "CLIApplication", representation(bowtieIndexFilePath="character", matepairFileNames="character") )
+
+#' @title Accessor getBowtieIndexFilePath
+#' @export
+#' @docType methods
+#' @return bowtieIndexFilePath
+setGeneric("getBowtieIndexFilePath", function(object) standardGeneric("getBowtieIndexFilePath"))
+setMethod("getBowtieIndexFilePath",signature(object="Bowtie2_CLI"),function(object) {
+  slot(object, "bowtieIndexFilePath")
+})
+
+#' @title Accessor getMatepairFileNames
+#' @export
+#' @docType methods
+#' @return matepairFileNames
+setGeneric("getMatepairFileNames", function(object){standardGeneric("getMatepairFileNames")})
+setMethod("getMatepairFileNames",signature(object="Bowtie2_CLI"),function(object) {
+  slot(object, "matepairFileNames")
+})
+
+#' @title Constructor method for Bowtie2_CLI
+#' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
+#' @export
+#' @docType methods
+setGeneric("Bowtie2_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath, matepairFileNames){standardGeneric("Bowtie2_CLI")})
+
+setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="character", 
+                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="missing"), 
+         function(inFilePath, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames){
+           inFileNames = list.files(path = inFilePath, pattern = ".*\\.fastq$")
+           return(
+             new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                 outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath,matepairFileNames="")
+           )
+         })
+setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="character", 
+                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="character"), 
+          function(inFilePath, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames){
+            inFileNames = list.files(path = inFilePath, pattern = ".*\\.fastq$")
+            return(
+              new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath,matepairFileNames=matepairFileNames)
+            )
+          })
+
+setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="missing"), 
+           function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames ){
+             return(
+               new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                   outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames="")
+             )
+          })
+setMethod("Bowtie2_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                   outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="character"), 
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames ){
+            return(
+              new("Bowtie2_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames=matepairFileNames)
+            )
+          })
+
+#' @title Generates the commands and possibly resulting files/folders of Bowtie2
+#' 
+#' @param Bowtie2_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="Bowtie2_CLI"),function(object) { 
+ #USAGE: bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
+  
+  allFiles = getInFileNames(object)
+  cmd1 = paste0("cd ",getInFilePath(object))
+  
+  allFilesOut = paste0( sub("\\.fastq$","",allFiles), getOutputFlag(object), ".fastq")
+  
+#   dir.create(getOutFilePath(object))
+  cmd2 = paste0("mkdir ", getOutFilePath(object)) #if only executed in terminal!
+  
+  if( getMatepairFileNames(object)[1] == "" ){
+    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", allFiles, " -S ",
+                  file.path(getOutFilePath(object), allFilesOut) )
+  } else{
+    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -1 ", allFiles,
+                 " -2 ",getMatepairFileNames(object), " -S ", file.path(getOutFilePath(object), allFilesOut) )
+  }
+                
+  res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(allFilesOut), commands = c(cmd1, cmd2, cmd3))
+  
+  return(res)
+})
+
+#--split Bowtie2TophatIon_CLI
+
+#'@include Bowtie2_CLI
+#'@title Bowtie2TophatIon_CLI
+#'@section Slots: 
+#'  \describe{
+#'    \item{\code{slot1}:}{inFilePath \code{"character"}}
+#'    \item{\code{slot2}:}{inFileNames \code{"character"}}
+#'    \item{\code{slot3}:}{cliParams \code{"character"}}
+#'    \item{\code{slot4}:}{outFilePath \code{"character"}}
+#'    \item{\code{slot5}:}{outputFlag \code{"character"}}
+#'    \item{\code{slot6}:}{bowtieIndexFilePath \code{"character"}}
+#'    \item{\code{slot7}:}{matepairFileNames \code{"character"}}
+#'    \item{\code{slot8}:}{outFileNames \code{"character"}}
+#'    \item{\code{slot9}:}{pathToPicardTools \code{"character"}}
+#'    \item{\code{slot9}:}{addNHTag \code{"character"}}
+#'  }
+#' @name Bowtie2TophatIon_CLI-class
+#' @export
+setClass("Bowtie2TophatIon_CLI", contains = "Bowtie2_CLI", representation(outFileNames="character", pathToPicardTools="character", addNHTag="logical"), 
+         prototype(outFileNames = "unmapped"))
+
+# @title Validity method for Bowtie2TophatIon_CLI
+# @name validityBowtie2TophatIon_CLI
+# @rdname validityBowtie2TophatIon_CLI
+# @export
+# @docType methods
+setValidity ("Bowtie2TophatIon_CLI",
+             function ( object ){
+               retval = NULL
+               if(length(getInFilePath(object)) > 1){ retval = "Multiple In File Paths (Tophat output directories are not allowed!)" }                          
+               if ( is.null(retval)){
+                 return(TRUE)
+               }
+               else{
+                 return(retval)
+               }
+             })
+
+#' @title Constructor method for Bowtie2TophatIon_CLI
+#' @export
+#' @docType methods
+setGeneric("Bowtie2TophatIon_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames, 
+                                            outFileNames, pathToPicardTools, addNHTag){standardGeneric("Bowtie2TophatIon_CLI")})
+
+setMethod("Bowtie2TophatIon_CLI", signature(inFilePath="character", inFileNames="missing", cliParams="missing", 
+                                   outputFlag="character", outFilePath="missing", bowtieIndexFilePath="character", matepairFileNames="missing", 
+                                   outFileNames="missing", pathToPicardTools="missing", addNHTag="logical"), 
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames,outFileNames, pathToPicardTools, addNHTag){
+                            
+            warning("Options are locked and input file name is set to unmapped, outfile is set to bam mate pairs are not supported!")
+            if(missing(outFileNames)){outFileNames = "aligned"}
+            if(missing(pathToPicardTools)){pathToPicardTools = "/usr/local/applications/picard-tools-1.77/"}
+            if(missing(outFilePath)){outFilePath = inFilePath; warning("outFilePath is set to inFilePath")}
+            
+            return(
+              new("Bowtie2TophatIon_CLI", inFilePath=inFilePath, inFileNames="unmapped", cliParams=c("--local","--very-sensitive-local","-p 8","--mm"), 
+                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames="", 
+                  outFileNames = outFileNames, pathToPicardTools=pathToPicardTools, addNHTag = addNHTag)
+            )
+          })
+
+
+setMethod("Bowtie2TophatIon_CLI", signature(inFilePath="character", inFileNames="character", cliParams="character", 
+                                            outputFlag="character", outFilePath="character", bowtieIndexFilePath="character", matepairFileNames="character", 
+                                            outFileNames="character", pathToPicardTools="character", addNHTag="logical"), 
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, bowtieIndexFilePath,matepairFileNames,outFileNames, pathToPicardTools, addNHTag){
+            return(
+              new("Bowtie2TophatIon_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                  outputFlag=outputFlag, outFilePath=outFilePath, bowtieIndexFilePath=bowtieIndexFilePath, matepairFileNames=matepairFileNames, 
+                  outFileNames = outFileNames, pathToPicardTools=pathToPicardTools, addNHTag = addNHTag)
+            )
+          })
+
+
+#' @title Accessor getOutFileNames
+#' @export
+#' @docType methods
+#' @return outFileNames
+setGeneric("getOutFileNames", function(object){standardGeneric("getOutFileNames")})
+setMethod("getOutFileNames",signature(object="Bowtie2_CLI"),function(object) {
+  slot(object, "outFileNames")
+})
+
+
+#' @title Accessor getAddNHTag
+#' @export
+#' @docType methods
+#' @return addNHTag
+setGeneric("getAddNHTag", function(object){standardGeneric("getAddNHTag")})
+setMethod("getAddNHTag",signature(object="Bowtie2_CLI"),function(object) {
+  slot(object, "addNHTag")
+})
+
+#' @title Accessor getPathToPicardTools
+#' @export
+#' @docType methods
+#' @return pathToPicardTools
+setGeneric("getPathToPicardTools", function(object){standardGeneric("getPathToPicardTools")})
+setMethod("getPathToPicardTools",signature(object="Bowtie2_CLI"),function(object) {
+  slot(object, "pathToPicardTools")
+})
+
+
+#' @title Generates the commands and possibly resulting files/folders of Bowtie2 in combination with Tophat output for ion Torrent
+#' 
+#' @param Bowtie2TophatIon_CLI
+#' @return CmdGenResult
+#' @rdname generateCommandResult-method
+#' @export
+setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),function(object) { 
+  #USAGE: bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
+  #When Tophout2 results are created, bam2fastq is callled, then bowtie 2 is called, results are merged by picard tools MergeSamFiles
+  allFiles = getInFileNames(object)
+  
+    inFP = getInFilePath(object)
+    
+    cmd1 = paste0("cd ",inFP)
+    outFile = paste0( getOutFileNames(object), getOutputFlag(object), ".bam")  
+  
+    cmd2 = paste0("bam2fastq -o unmapped.fastq unmapped.bam")
+    cmd3 = paste0("bowtie2 ", paste0(getCliParams(object),collapse=" "), " -x ", getBowtieIndexFilePath(object), " -U ", "unmapped.fastq", 
+                  " | samtools view -uhS -F4 - | samtools sort - unmapped_remap")
+    
+    if( getAddNHTag(object) ){
+      cmd3 = c(cmd3, paste0("samtools sort -n unmapped_remap.bam unmapped_remap_sn") )
+      cmd3 = c(cmd3, paste0( "python -c \"import bbcflib.mapseq; bbcflib.mapseq.add_nh_flag('",file.path( inFP,"unmapped_remap_sn.bam"),
+                            "', '",file.path( inFP,"unmapped_remap.bam"),"')\"" ) )    
+    }
+  
+    cmd4 = paste0("java -jar ", file.path( getPathToPicardTools(object), "MergeSamFiles.jar"),
+                  " USE_THREADING=true MSD=true AS=true I=accepted_hits.bam I=unmapped_remap.bam O=",file.path(getOutFilePath(object), outFile) )
+        
+    res = CmdGenResult(CLIApplication = object, OutResultReference = FilesOutput(outFile), commands = c(cmd1, cmd2, cmd3, cmd4))
+    return(res)
+  } )
+
 
 #--split Tophat2_CLI
 
@@ -922,7 +1219,7 @@ setMethod("generateCommandResult",signature(object="Tophat2_CLI"),function(objec
   
   #preparing output files
   sampleOutDir = paste0( paste0( sub("\\.fastq$","",inFN),getOutputFlag(object))  )
-  sampleOutDir = file.path(getOutFilePath(object), sampleOutDir)
+  
   #generating the tophat base directory
   outfilepath = getOutFilePath(object)
 #   dir.create(outfilepath)
@@ -933,7 +1230,7 @@ setMethod("generateCommandResult",signature(object="Tophat2_CLI"),function(objec
   
   #generating the tophat command
   cmd3 = paste0( "tophat2 ", paste0(getCliParams(object), collapse=" "), 
-                 " --output-dir ", sampleOutDir, " ", getBowtieIndexFilePath(object), " ", file.path(inFP,inFN) )
+                 " --output-dir ", file.path(file.path(getOutFilePath(object), sampleOutDir)), " ", getBowtieIndexFilePath(object), " ", file.path(inFP,inFN) )
   
   #IN FILENAME UND BOWTIE INDEX PATH FEHLEN!
   

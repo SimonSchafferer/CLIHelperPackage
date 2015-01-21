@@ -3,45 +3,65 @@
 \docType{methods}
 \name{generateCommandResult}
 \alias{generateCommandResult}
+\alias{generateCommandResult,BamToBed_CLI-method}
 \alias{generateCommandResult,Bowtie2TophatIon_CLI-method}
 \alias{generateCommandResult,Bowtie2_CLI-method}
 \alias{generateCommandResult,Cutadapt_CLI-method}
 \alias{generateCommandResult,HTSeqCount_CLI-method}
+\alias{generateCommandResult,IntersectBed_CLI-method}
+\alias{generateCommandResult,MergeBedFile_CLI-method}
 \alias{generateCommandResult,MultiBamCov_CLI-method}
 \alias{generateCommandResult,Samtools_CLI-method}
+\alias{generateCommandResult,SortFile_CLI-method}
 \alias{generateCommandResult,Tophat2_CLI-method}
 \title{Generates the commands and possibly resulting files/folders}
 \usage{
 generateCommandResult(object)
 
-\S4method{generateCommandResult}{Bowtie2_CLI}(object)
-
-\S4method{generateCommandResult}{Bowtie2TophatIon_CLI}(object)
-
 \S4method{generateCommandResult}{Cutadapt_CLI}(object)
 
 \S4method{generateCommandResult}{HTSeqCount_CLI}(object)
 
+\S4method{generateCommandResult}{IntersectBed_CLI}(object)
+
+\S4method{generateCommandResult}{MergeBedFile_CLI}(object)
+
 \S4method{generateCommandResult}{MultiBamCov_CLI}(object)
 
 \S4method{generateCommandResult}{Samtools_CLI}(object)
+
+\S4method{generateCommandResult}{BamToBed_CLI}(object)
+
+\S4method{generateCommandResult}{SortFile_CLI}(object)
+
+\S4method{generateCommandResult}{Bowtie2_CLI}(object)
+
+\S4method{generateCommandResult}{Bowtie2TophatIon_CLI}(object)
 
 \S4method{generateCommandResult}{Tophat2_CLI}(object)
 }
 \arguments{
 \item{CLIApplication}{}
 
-\item{Bowtie2_CLI}{}
-
-\item{Bowtie2TophatIon_CLI}{}
-
 \item{Cutadapt_CLI}{}
 
 \item{HTSeqCount_CLI}{}
 
+\item{IntersectBed_CLI}{}
+
+\item{MergeBedFile_CLI}{}
+
 \item{MultiBamCov_CLI}{}
 
 \item{Samtools_CLI}{}
+
+\item{BamToBed_CLI}{}
+
+\item{SortFile_CLI}{}
+
+\item{Bowtie2_CLI}{}
+
+\item{Bowtie2TophatIon_CLI}{}
 
 \item{Tophat2_CLI}{}
 }
@@ -61,21 +81,37 @@ CmdGenResult
 CmdGenResult
 
 CmdGenResult
+
+CmdGenResult
+
+CmdGenResult
+
+CmdGenResult
+
+CmdGenResult
 }
 \description{
 Generates the commands and possibly resulting files/folders
-
-Generates the commands and possibly resulting files/folders of Bowtie2
-
-Generates the commands and possibly resulting files/folders of Bowtie2 in combination with Tophat output for ion Torrent
 
 Generates the commands and possibly resulting files/folders of Cutadapt
 
 Generates the commands and possibly resulting files/folders of HTSeqCount_CLI
 
+Generates the commands and possibly resulting files of linux sort command IntersectBed_CLI
+
+Generates the commands and possibly resulting files/folders of Cutadapt
+
 Generates the commands and possibly resulting files/folders of MultiBamCov_CLI
 
 Generates the commands and possibly resulting files/folders of Samtools
+
+Generates the commands and possibly resulting files/folders of BamToBed_CLI
+
+Generates the commands and possibly resulting files of linux sort command SortFile_CLI
+
+Generates the commands and possibly resulting files/folders of Bowtie2
+
+Generates the commands and possibly resulting files/folders of Bowtie2 in combination with Tophat output for ion Torrent
 
 Generates the commands and possibly resulting files/folders of Tophat2
 }

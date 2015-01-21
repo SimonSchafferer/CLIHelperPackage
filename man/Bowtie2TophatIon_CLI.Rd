@@ -7,7 +7,7 @@
 \usage{
 Bowtie2TophatIon_CLI(inFilePath, inFileNames, cliParams, outputFlag,
   outFilePath, bowtieIndexFilePath, matepairFileNames, outFileNames,
-  pathToPicardTools)
+  pathToPicardTools, addNHTag)
 }
 \description{
 Constructor method for Bowtie2TophatIon_CLI

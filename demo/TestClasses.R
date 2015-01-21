@@ -107,4 +107,11 @@ testIndex = MultiBamCov_CLI(inFilePath="/home/simon/PHDStudies/RNA-Seq/IonProton
 generateCommandResult(testIndex)
 
 
+generateCommandResult(SortFile_CLI(inFilePath = "/tmp", inFileNames = "test.bed", cliParams = "-k1,1 -k2,2n", outputFlag = "_sorted_", outFilePath = "/tmp"))
 
+generateCommandResult(MergeBedFile(inFilePath = "/tmp", inFileNames = "test.bed", cliParams = "-s -c 4,5,6 -o mean,mean,distinct", outputFlag = "_merged_", outFilePath = "/tmp"))
+
+
+generateCommandResult(IntersectBed_CLI(inFilePath = "/tmp", inFileNames = c("test.bed", "testB.bed"), cliParams = "-s", outputFlag = "", outFilePath = "/tmp/testout", outFileName = "WTintersection"))
+generateCommandResult(IntersectBed_CLI(inFilePath = c("/tmp", "/tmp", "/tmp"), inFileNames = c("test.bed", "testB.bed", "testC.bed"), cliParams = "-s", outputFlag = "", outFilePath = "/tmp/testout", outFileName = "WTintersection"))
+generateCommandResult(BamToBed_CLI(inFilePath = "/tmp/",inFileNames = "test.bam", cliParams = "", outputFlag = "", outFilePath = "/tmp",outputFormat = "bed"))
