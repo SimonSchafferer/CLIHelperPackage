@@ -38,6 +38,11 @@ bowtie2TophatIonCLI = Bowtie2TophatIon_CLI(inFilePath = "/home/simon/PHDStudies/
                      bowtieIndexFilePath = "/home/simon/dbsOfflineUse/MusMusculus/Mouse_mm10_fasta/bowtie2/mm10")
 bowtie2TophatIonCLI_cmdRes = generateCommandResult( object = bowtie2TophatIonCLI )
 
+
+bowtieCLI = Bowtie_CLI(inFilePath="/tmp/", inFileNames="test_trimmed.fastq", cliParams="-qSya -n 1 -p 3 --chunkmbs 1024 --best -l 28 -m 100 --phred64-quals --strata", outputFlag="_mapped", 
+                  outFilePath="/tmp/testout/", bowtieIndexFilePath="path/to/bowtie/index", addNHTag=TRUE, outputPipeString="| samtools view -uhS -F4 - | samtools sort -",outputFormat="bam")
+
+bowtieCLI_cmRes = generateCommandResult(bowtieCLI)
 ###################################
 #   Samtools test classes (only templating ... maybe leave them out of package...)
 ###################################

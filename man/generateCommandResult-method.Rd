@@ -6,6 +6,7 @@
 \alias{generateCommandResult,BamToBed_CLI-method}
 \alias{generateCommandResult,Bowtie2TophatIon_CLI-method}
 \alias{generateCommandResult,Bowtie2_CLI-method}
+\alias{generateCommandResult,Bowtie_CLI-method}
 \alias{generateCommandResult,Cutadapt_CLI-method}
 \alias{generateCommandResult,HTSeqCount_CLI-method}
 \alias{generateCommandResult,IntersectBed_CLI-method}
@@ -39,6 +40,8 @@ generateCommandResult(object)
 \S4method{generateCommandResult}{Bowtie2TophatIon_CLI}(object)
 
 \S4method{generateCommandResult}{Tophat2_CLI}(object)
+
+\S4method{generateCommandResult}{Bowtie_CLI}(object)
 }
 \arguments{
 \item{CLIApplication}{}
@@ -64,8 +67,12 @@ generateCommandResult(object)
 \item{Bowtie2TophatIon_CLI}{}
 
 \item{Tophat2_CLI}{}
+
+\item{Bowtie_CLI}{}
 }
 \value{
+CmdGenResult
+
 CmdGenResult
 
 CmdGenResult
@@ -114,5 +121,7 @@ Generates the commands and possibly resulting files/folders of Bowtie2
 Generates the commands and possibly resulting files/folders of Bowtie2 in combination with Tophat output for ion Torrent
 
 Generates the commands and possibly resulting files/folders of Tophat2
+
+Generates the commands and possibly resulting files/folders of Bowtie2
 }
 
