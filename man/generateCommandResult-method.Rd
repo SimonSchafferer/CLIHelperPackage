@@ -13,6 +13,7 @@
 \alias{generateCommandResult,MergeBedFile_CLI-method}
 \alias{generateCommandResult,MultiBamCov_CLI-method}
 \alias{generateCommandResult,MultiIntersectBed_CLI-method}
+\alias{generateCommandResult,MultiIntersectBed_perl_CLI-method}
 \alias{generateCommandResult,Samtools_CLI-method}
 \alias{generateCommandResult,SortFile_CLI-method}
 \alias{generateCommandResult,Tophat2_CLI-method}
@@ -45,6 +46,8 @@ generateCommandResult(object)
 \S4method{generateCommandResult}{Bowtie_CLI}(object)
 
 \S4method{generateCommandResult}{MultiIntersectBed_CLI}(object)
+
+\S4method{generateCommandResult}{MultiIntersectBed_perl_CLI}(object)
 }
 \arguments{
 \item{CLIApplication}{}
@@ -74,8 +77,12 @@ generateCommandResult(object)
 \item{Bowtie_CLI}{}
 
 \item{MultiIntersectBed_CLI}{}
+
+\item{MultiIntersectBed_perl_CLI}{}
 }
 \value{
+CmdGenResult
+
 CmdGenResult
 
 CmdGenResult
@@ -132,5 +139,7 @@ Generates the commands and possibly resulting files/folders of Tophat2
 Generates the commands and possibly resulting files/folders of Bowtie2
 
 Generates the commands and possibly resulting files/folders of Cutadapt
+
+Generates the commands and file for MultiIntersectBed
 }
 
