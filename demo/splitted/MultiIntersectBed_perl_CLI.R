@@ -9,33 +9,51 @@
 #'    \item{\code{slot4}:}{outFilePath \code{"character"}}
 #'    \item{\code{slot5}:}{outputFlag \code{"character"}}
 #'    \item{\code{slot6}:}{groupVect \code{"numeric"}}
-#'    \item{\code{slot7}:}{outFileName \code{"character"}}
+#'    \item{\code{slot7}:}{withinGroupTH \code{"numeric"}}
+#'    \item{\code{slot8}:}{outFileName \code{"character"}}
 #'  }
 #' @name MultiIntersectBed_perl_CLI-class
 #' @export
-setClass("MultiIntersectBed_perl_CLI", contains = "CLIApplication", representation(groupVect="numeric", outFileName="character"))
+setClass("MultiIntersectBed_perl_CLI", contains = "CLIApplication", representation(groupVect="numeric", withinGroupTH="numeric", outFileName="character"))
 
 
 #' @title Constructor method for MultiIntersectBed_perl_CLI
 #' @param inFilePath (inFileNames may also be specified otherwise they will be fetched by list.files)
 #' @export
 #' @docType methods
-setGeneric("MultiIntersectBed_perl_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect,outFileName){standardGeneric("MultiIntersectBed_perl_CLI")})
+setGeneric("MultiIntersectBed_perl_CLI", function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect,withinGroupTH,outFileName){standardGeneric("MultiIntersectBed_perl_CLI")})
 
 setMethod("MultiIntersectBed_perl_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
-                                             outputFlag="character", outFilePath="character",groupVect="numeric",outFileName="character"),
-          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect, outFileName ){
+                                             outputFlag="character", outFilePath="character",groupVect="numeric",withinGroupTH="numeric",outFileName="character"),
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect, withinGroupTH, outFileName ){
             cliParams=""
             return(new("MultiIntersectBed_perl_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams="", 
-                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect, outFileName=outFileName ))
+                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect,withinGroupTH=withinGroupTH, outFileName=outFileName ))
           })
 setMethod("MultiIntersectBed_perl_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
-                                                  outputFlag="character", outFilePath="character",groupVect="missing",outFileName="character"),
-          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect, outFileName ){
+                                                  outputFlag="character", outFilePath="character",groupVect="numeric",withinGroupTH="missing",outFileName="character"),
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect, withinGroupTH, outFileName ){
+            cliParams=""
+            withinGroupTH = 0
+            return(new("MultiIntersectBed_perl_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams="", 
+                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect,withinGroupTH=withinGroupTH, outFileName=outFileName ))
+          })
+setMethod("MultiIntersectBed_perl_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
+                                                  outputFlag="character", outFilePath="character",groupVect="missing",withinGroupTH="numeric",outFileName="character"),
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect,withinGroupTH, outFileName ){
             groupVect = numeric()
             cliParams=""
             return(new("MultiIntersectBed_perl_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
-                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect, outFileName=outFileName ))
+                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect, withinGroupTH=withinGroupTH, outFileName=outFileName ))
+          })
+setMethod("MultiIntersectBed_perl_CLI", signature(inFilePath="character", inFileNames="character", cliParams="missing", 
+                                                  outputFlag="character", outFilePath="character",groupVect="missing",withinGroupTH="missing",outFileName="character"),
+          function(inFilePath, inFileNames, cliParams, outputFlag, outFilePath, groupVect,withinGroupTH, outFileName ){
+            groupVect = numeric()
+            cliParams=""
+            withinGroupTH = 0
+            return(new("MultiIntersectBed_perl_CLI", inFilePath=inFilePath, inFileNames=inFileNames, cliParams=cliParams, 
+                       outputFlag=outputFlag, outFilePath=outFilePath, groupVect=groupVect, withinGroupTH=withinGroupTH, outFileName=outFileName ))
           })
 
 #' @title Accessor getGroupVect
@@ -45,6 +63,16 @@ setMethod("MultiIntersectBed_perl_CLI", signature(inFilePath="character", inFile
 setGeneric("getGroupVect", function(object){standardGeneric("getGroupVect")})
 setMethod("getGroupVect",signature(object="MultiIntersectBed_perl_CLI"),function(object) {
   slot(object, "groupVect")
+})
+
+
+#' @title Accessor getWithinGroupTH
+#' @export
+#' @docType methods
+#' @return withinGroupTH
+setGeneric("getWithinGroupTH", function(object){standardGeneric("getWithinGroupTH")})
+setMethod("getWithinGroupTH",signature(object="MultiIntersectBed_perl_CLI"),function(object) {
+  slot(object, "withinGroupTH")
 })
 
 #' @title Accessor getOutFileName
@@ -82,10 +110,12 @@ setMethod("generateCommandResult",signature(object="MultiIntersectBed_perl_CLI")
   if(length(getGroupVect(object)) == 0){
     cmd2 = paste0( "perl ",system.file("data/multiIntersectBed_helper.pl",package="CLIHelperPackage"),
                    " -o ", file.path(getOutFilePath(object),outFN ),
+                   " -w ", getWithinGroupTH(object), 
                    " -i ", paste0( file.path(getInFilePath(object), getInFileNames(object) ),collapse=" ") )    
   } else{
     cmd2 = paste0( "perl ",system.file("data/multiIntersectBed_helper.pl",package="CLIHelperPackage"),
                    " -o ", file.path(getOutFilePath(object),outFN ),
+                   " -w ", getWithinGroupTH(object), 
                    " -g ", paste0(getGroupVect(object),collapse=" "),
                    " -i ", paste0( file.path(getInFilePath(object), getInFileNames(object) ),collapse=" ") )
   }
