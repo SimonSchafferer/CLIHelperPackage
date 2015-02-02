@@ -16,7 +16,8 @@ MultiIntersectBed_perl_CLI
    \item{\code{slot4}:}{outFilePath \code{"character"}}
    \item{\code{slot5}:}{outputFlag \code{"character"}}
    \item{\code{slot6}:}{groupVect \code{"numeric"}}
-   \item{\code{slot7}:}{outFileName \code{"character"}}
+   \item{\code{slot7}:}{withinGroupTH \code{"numeric"}}
+   \item{\code{slot8}:}{outFileName \code{"character"}}
  }
 }
 

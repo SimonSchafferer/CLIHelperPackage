@@ -6,7 +6,7 @@
 \title{Constructor method for MultiIntersectBed_perl_CLI}
 \usage{
 MultiIntersectBed_perl_CLI(inFilePath, inFileNames, cliParams, outputFlag,
-  outFilePath, groupVect, outFileName)
+  outFilePath, groupVect, withinGroupTH, outFileName)
 }
 \arguments{
 \item{inFilePath}{(inFileNames may also be specified otherwise they will be fetched by list.files)}
