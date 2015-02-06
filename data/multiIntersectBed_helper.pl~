@@ -97,7 +97,7 @@ if( scalar @groups != 0 ){
 	rename $mergedFN, $out_fn;
 }
 
-removing the files generated temporarily
+#removing the files generated temporarily
 unlink @inputBEDplus;
 unlink @inputBEDminus;
 
