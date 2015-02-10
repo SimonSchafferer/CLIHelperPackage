@@ -81,21 +81,21 @@ unlink $out_fn;
 rename $sortedFN, $out_fn;
 
 #This thought I do not understand...may be avoided
-if( scalar @groups != 0 ){
-	my $mergedFN = $out_fn."merged";
-
-	unless(open MERGED,'>', $mergedFN) {
-	       die "nUnable to open '$mergedFN'\n";
-	}
-	open (BED, "mergeBed -s -c 4,5,6 -o distinct,distinct,distinct -i $out_fn |");
-	while (<BED>) {
-		print MERGED;
-	}
-	close BED;
-	close MERGED;
-	unlink $out_fn;
-	rename $mergedFN, $out_fn;
-}
+#if( scalar @groups != 0 ){
+#	my $mergedFN = $out_fn."merged";
+#
+#	unless(open MERGED,'>', $mergedFN) {
+#	       die "nUnable to open '$mergedFN'\n";
+#	}
+#	open (BED, "mergeBed -s -c 4,5,6 -o distinct,distinct,distinct -i $out_fn |");
+#	while (<BED>) {
+#		print MERGED;
+#	}
+#	close BED;
+#	close MERGED;
+#	unlink $out_fn;
+#	rename $mergedFN, $out_fn;
+#}
 
 #removing the files generated temporarily
 unlink @inputBEDplus;
