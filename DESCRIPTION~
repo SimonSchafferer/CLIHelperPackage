@@ -1,0 +1,10 @@
+Package: CLIHelperPackage
+Type: Package
+Title: A packages that manages easy access to cmdLine applications within R (related to RNA-Seq)
+Version: 1.0
+Date: 2015-01-09
+Author: Simon Schafferer
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: This package contains one class for each command line application and supports easy access and follow of executed commands and results created. 
+Currently some applications are restricted to specific use cases, this will be changed in future versions
+License: MIT
