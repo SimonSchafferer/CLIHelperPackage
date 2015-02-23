@@ -68,7 +68,9 @@ setMethod("generateCommandResult",signature(object="MultiBamCov_CLI"),function(o
   inFNs = getInFileNames(object)
   cmd1 = paste0("cd ",getInFilePath(object))
   
-  outFN = paste0( gsub(".*/","",sub( "\\..*$","",inFNs[1])), getOutputFlag(object) )
+#   outFN = paste0( gsub(".*/","",sub( "\\..*$","",inFNs[1])), getOutputFlag(object) )
+  outFN = paste0( getOutputFlag(object) )
+  
   cmd2 = paste0( "bedtools multicov ", paste0(getCliParams(object),collapse=" "), " -bams ", paste0(inFNs, collapse=" "), " -",
                  getAnnotationType(object)," ", getAnnotationFileMB(object), " > ",  file.path(getOutFilePath(object),outFN)  )
   
