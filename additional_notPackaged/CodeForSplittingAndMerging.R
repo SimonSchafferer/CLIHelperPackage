@@ -1,5 +1,8 @@
 
-test = list.files( "/home/simon/RWorkspace/CLIHelperPackage/demo/splitted")
+pathToSplittedFiles = file.path(path.expand("~"),"Rworkspace/CLIHelperPackage/additional_notPackaged/splitted")
+pathToSingleFile = file.path(path.expand("~"),"Rworkspace/CLIHelperPackage/R/")
+
+test = list.files( )
 names(test) = test
 ORDER = c("CLIApplication.R", "OutResultReference.R", "FilesOutput.R", 
   "FoldersOutput.R", "CmdGenResult.R", "CmdGenResultExec.R", "Cutadapt_CLI.R", 
@@ -9,5 +12,5 @@ ORDER = c("CLIApplication.R", "OutResultReference.R", "FilesOutput.R",
 
 test[ORDER]
 
-mergeClassFiles(inPath = "/home/simon/RWorkspace/CLIHelperPackage/demo/splitted", filename=test[ORDER], outPath = "/home/simon/RWorkspace/CLIHelperPackage/R/", outFilename = "singleRCodeFile.R" )
+ClassSplitMergeHelper::mergeClassFiles(inPath = pathToSplittedFiles, filename=test[ORDER], outPath = pathToSingleFile, outFilename = "singleRCodeFile.R" )
 
