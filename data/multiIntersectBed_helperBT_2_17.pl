@@ -80,7 +80,7 @@ close SORTED;
 unlink $out_fn;
 rename $sortedFN, $out_fn;
 
-#Merging ranges that are proximal to each other
+#This thought I do not understand...may be avoided
 if( scalar @groups != 0 ){
 	my $mergedFN = $out_fn."merged";
 
@@ -96,24 +96,6 @@ if( scalar @groups != 0 ){
 	unlink $out_fn;
 	rename $mergedFN, $out_fn;
 }
-
-#Removing all IDs after the commas separating the IDS (12,15,16 -> 12)
-
-my $cleaned = $out_fn."cleaned";
-
-unless(open CLEANED,'>', $cleaned) {
-       die "nUnable to open '$cleaned'\n";
-}
-
-open (BED, "awk -v OFS=\'\\t\' \'{gsub(\",.*\",\"\",\$4)}1\' $out_fn |");
-while (<BED>) {
-	print CLEANED;
-}
-close BED;
-close CLEANED;
-unlink $out_fn;
-rename $cleaned, $out_fn;
-
 
 #removing the files generated temporarily
 unlink @inputBEDplus;
