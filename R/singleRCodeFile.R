@@ -94,7 +94,7 @@ setMethod("getOutResultName",signature(object="OutResultReference"),function(obj
 })
 
 #--split FilesOutput
-#'@include OutResultReference
+#@include OutResultReference
 #'@title FilesOutput
 #'@section Slots: 
 #'  \describe{
@@ -106,7 +106,7 @@ setClass("FilesOutput", contains = "OutResultReference")
 
 #--split FoldersOutput
 
-#'@include OutResultReference
+#@include OutResultReference
 #'@title FoldersOutput
 #'@section Slots: 
 #'  \describe{
@@ -227,43 +227,47 @@ CmdGenResult = function(CLIApplication,OutResultReference,commands ){
 #' @param \code{"CmdGenResult"}
 #' @export
 #' @docType methods
-setGeneric("executeCommandResult", function( object, testing ) { 
-  
-  if(isClass(object,"CmdGenResult") & missing(testing)){
-    executeCommandResult(object=object, testing=FALSE)
-  } else if(isClass(object,"CmdGenResult")) {
-    executeCommandResult(object=object, testing=testing)
-  } else{
-    stop( paste("Function for class",class(object), "not defined!"))
-  }
-})
+setGeneric("executeCommandResult", function(object, ...) {
+  standardGeneric("executeCommandResult") })
+#' @title Executes the commands of a executeCommandResult object
+#' @param \code{"CmdGenResult"}
+#' @param \code{"testing"} boolean testing if true - command is not executed
+#' @export
+#' @docType methods
+setMethod("executeCommandResult",signature(object="CmdGenResult"), function(object, testing=FALSE, useTee=TRUE) {
 
-setMethod("executeCommandResult",signature(object="CmdGenResult", testing="logical"), function(object, testing=FALSE) {
-#   message( paste0("Executing command:\n", getCommandLog(object)) )
-    logs = lapply( getCommands(object), function(x){
-      #setting the directory to the InputFilePath
-      currWD = getwd()
-      message( paste0("Executing command:\n", x) )
-      log = tryCatch({
-        if(!testing){
+  #   message( paste0("Executing command:\n", getCommandLog(object)) )
+  logs = lapply( getCommands(object), function(x){
+    #setting the directory to the InputFilePath
+    currWD = getwd()
+    message( paste0("Executing command:\n", x) )
+    log = tryCatch({
+      if(!testing){
+        if(!useTee){
           setwd(getInFilePath(getCLIApplication(object = object)))
-          system(x, intern = TRUE)
+          cmdRes = system(x,intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+          return(cmdRes)
         } else{
-          message("Testing ... command is not executed!")
-          return(x)
+          setwd(getInFilePath(getCLIApplication(object = object)))
+          logFile = tempfile()
+          system(paste0(x," 2>&1 | tee ",logFile),intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+          return( readLines(logFile) )
         }
-      }, warning = function(w){
-        warning(w)
-      }, error = function(e){
-        paste0("Error when executing code ", e)
-      }, finally = {
-        setwd( currWD )
-      })
-      return(log)
+      } else{
+        message("Testing ... command is not executed!")
+        return(x)
+      }
+    }, warning = function(w){
+      warning(w)
+    }, error = function(e){
+      paste0("Error when executing code ", e)
+    }, finally = {
+      setwd( currWD )
+    })
+    return(log)
   })
   return( CmdGenResultExec(cmdGenResult=object, execLog=logs))
 })
-
 
 #--split CmdGenResultExec
 
@@ -322,7 +326,7 @@ setMethod("getExecLogFormatted",signature(object="CmdGenResultExec"),function(ob
 
 
 #--split Cutadapt_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Cutadapt_CLI
 #'@section Slots: 
 #'  \describe{
@@ -375,7 +379,7 @@ setMethod("generateCommandResult",signature(object="Cutadapt_CLI"),function(obje
 
 #--split HTSeqCount_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title HTSeqCount_CLI
 #'@section Slots: 
 #'  \describe{
@@ -438,7 +442,7 @@ setMethod("generateCommandResult",signature(object="HTSeqCount_CLI"),function(ob
 
 
 #--split IntersectBed_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title IntersectBed_CLI
 #'@section Slots: 
 #'  \describe{
@@ -522,7 +526,7 @@ setMethod("generateCommandResult",signature(object="IntersectBed_CLI"),function(
 
 
 #--split MergeBedFile_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MergeBedFile_CLI
 #'@section Slots: 
 #'  \describe{
@@ -582,7 +586,7 @@ setMethod("generateCommandResult",signature(object="MergeBedFile_CLI"),function(
 
 #--split MultiBamCov_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MultiBamCov_CLI
 #'@section Slots: 
 #'  \describe{
@@ -666,7 +670,7 @@ setMethod("generateCommandResult",signature(object="MultiBamCov_CLI"),function(o
 
 #--split Genomecov_CLI
 # Needs to be placed after IntersectBed_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Genomecov_CLI
 #'@section Slots: 
 #'  \describe{
@@ -742,7 +746,7 @@ setMethod("generateCommandResult",signature(object="Genomecov_CLI"),function(obj
 
 #--split Samtools_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Samtools_CLI
 #'@section Slots: 
 #'  \describe{
@@ -840,7 +844,7 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
            #samtools sort -n aligned.bam aligned_sn
            outFNprefix = paste0( sub("\\..*$","",inFN),getOutputFlag(object) )
            outFN = paste0(outFNprefix, ".", outfmt)
-           cmd2 = paste0("samtools sort ",paste0(getCliParams(object),collapse=" ")," ", inFN," ", outFNprefix )
+           cmd2 = paste0("samtools sort ",paste0(getCliParams(object),collapse=" ")," ", inFN," -o ", outFN )
            
           },
          index = {
@@ -860,7 +864,6 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
 
 #--split BamToBed_CLI
 
-#'@include Samtools_CLI
 #'@title BamToBed_CLI
 #'@section Slots: 
 #'  \describe{
@@ -923,7 +926,7 @@ setMethod("generateCommandResult",signature(object="BamToBed_CLI"),function(obje
 })
 
 #--split SortFile_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title SortFile_CLI
 #'@section Slots: 
 #'  \describe{
@@ -984,7 +987,7 @@ setMethod("generateCommandResult",signature(object="SortFile_CLI"),function(obje
 #     General generic function definitions that are implemented in several subclasses!
 #################################################
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Bowtie2_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1092,7 +1095,7 @@ setMethod("generateCommandResult",signature(object="Bowtie2_CLI"),function(objec
 
 #--split Bowtie2TophatIon_CLI
 
-#'@include Bowtie2_CLI
+#@include Bowtie2_CLI
 #'@title Bowtie2TophatIon_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1230,7 +1233,7 @@ setMethod("generateCommandResult",signature(object="Bowtie2TophatIon_CLI"),funct
 
 #--split Tophat2_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Tophat2_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1331,7 +1334,7 @@ setMethod("generateCommandResult",signature(object="Tophat2_CLI"),function(objec
 #     MUST BE PLACED AFTER Bowtie2TophatIon_CLI class!
 #################################################
 
-#'@include Samtools_CLI,Bowtie2Tophation_CLI
+#@include Samtools_CLI,Bowtie2Tophation_CLI
 #'@title Bowtie_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1469,7 +1472,7 @@ setMethod("generateCommandResult",signature(object="Bowtie_CLI"),function(object
 })
 
 #--split MultiIntersectBed_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MultiIntersectBed_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1656,7 +1659,7 @@ setMethod("generateCommandResult",signature(object="MultiIntersectBed_CLI"),func
   return(res)
 })
 #--split MultiIntersectBed_perl_CLI
-#'@include IntersectBed_CLI
+#@include IntersectBed_CLI
 #'@title MultiIntersectBed_perl_CLI
 #'@section Slots: 
 #'  \describe{
@@ -1803,7 +1806,7 @@ setMethod("generateCommandResult",signature(object="MultiIntersectBed_perl_CLI")
 })
 #--split RNAStar_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title RNAStar_CLI
 #'@section Slots: 
 #'  \describe{

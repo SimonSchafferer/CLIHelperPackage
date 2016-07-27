@@ -1,5 +1,5 @@
 #--split FilesOutput
-#'@include OutResultReference
+#@include OutResultReference
 #'@title FilesOutput
 #'@section Slots: 
 #'  \describe{

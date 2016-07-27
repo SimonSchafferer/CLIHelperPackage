@@ -3,7 +3,7 @@
 #     General generic function definitions that are implemented in several subclasses!
 #################################################
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Bowtie2_CLI
 #'@section Slots: 
 #'  \describe{

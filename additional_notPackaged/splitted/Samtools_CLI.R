@@ -1,6 +1,6 @@
 #--split Samtools_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Samtools_CLI
 #'@section Slots: 
 #'  \describe{
@@ -98,7 +98,7 @@ setMethod("generateCommandResult",signature(object="Samtools_CLI"),function(obje
            #samtools sort -n aligned.bam aligned_sn
            outFNprefix = paste0( sub("\\..*$","",inFN),getOutputFlag(object) )
            outFN = paste0(outFNprefix, ".", outfmt)
-           cmd2 = paste0("samtools sort ",paste0(getCliParams(object),collapse=" ")," ", inFN," ", outFNprefix )
+           cmd2 = paste0("samtools sort ",paste0(getCliParams(object),collapse=" ")," ", inFN," -o ", outFN )
            
           },
          index = {

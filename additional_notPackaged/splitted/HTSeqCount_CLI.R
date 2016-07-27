@@ -1,6 +1,6 @@
 #--split HTSeqCount_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title HTSeqCount_CLI
 #'@section Slots: 
 #'  \describe{

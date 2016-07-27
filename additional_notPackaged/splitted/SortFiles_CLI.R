@@ -1,5 +1,5 @@
 #--split SortFile_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title SortFile_CLI
 #'@section Slots: 
 #'  \describe{

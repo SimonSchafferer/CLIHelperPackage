@@ -1,6 +1,6 @@
 #--split Genomecov_CLI
 # Needs to be placed after IntersectBed_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Genomecov_CLI
 #'@section Slots: 
 #'  \describe{

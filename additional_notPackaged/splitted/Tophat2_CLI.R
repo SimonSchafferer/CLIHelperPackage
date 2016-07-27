@@ -1,6 +1,6 @@
 #--split Tophat2_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Tophat2_CLI
 #'@section Slots: 
 #'  \describe{

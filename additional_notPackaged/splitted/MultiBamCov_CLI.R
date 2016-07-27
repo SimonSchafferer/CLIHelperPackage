@@ -1,6 +1,6 @@
 #--split MultiBamCov_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MultiBamCov_CLI
 #'@section Slots: 
 #'  \describe{

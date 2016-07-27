@@ -1,6 +1,5 @@
 #--split BamToBed_CLI
 
-#'@include Samtools_CLI
 #'@title BamToBed_CLI
 #'@section Slots: 
 #'  \describe{

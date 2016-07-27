@@ -1,5 +1,5 @@
 #--split MultiIntersectBed_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MultiIntersectBed_CLI
 #'@section Slots: 
 #'  \describe{

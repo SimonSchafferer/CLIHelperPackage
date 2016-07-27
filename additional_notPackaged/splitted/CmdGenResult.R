@@ -75,41 +75,45 @@ CmdGenResult = function(CLIApplication,OutResultReference,commands ){
 #' @param \code{"CmdGenResult"}
 #' @export
 #' @docType methods
-setGeneric("executeCommandResult", function( object, testing ) { 
-  
-  if(isClass(object,"CmdGenResult") & missing(testing)){
-    executeCommandResult(object=object, testing=FALSE)
-  } else if(isClass(object,"CmdGenResult")) {
-    executeCommandResult(object=object, testing=testing)
-  } else{
-    stop( paste("Function for class",class(object), "not defined!"))
-  }
-})
+setGeneric("executeCommandResult", function(object, ...) {
+  standardGeneric("executeCommandResult") })
+#' @title Executes the commands of a executeCommandResult object
+#' @param \code{"CmdGenResult"}
+#' @param \code{"testing"} boolean testing if true - command is not executed
+#' @export
+#' @docType methods
+setMethod("executeCommandResult",signature(object="CmdGenResult"), function(object, testing=FALSE, useTee=TRUE) {
 
-setMethod("executeCommandResult",signature(object="CmdGenResult", testing="logical"), function(object, testing=FALSE) {
-#   message( paste0("Executing command:\n", getCommandLog(object)) )
-    logs = lapply( getCommands(object), function(x){
-      #setting the directory to the InputFilePath
-      currWD = getwd()
-      message( paste0("Executing command:\n", x) )
-      log = tryCatch({
-        if(!testing){
+  #   message( paste0("Executing command:\n", getCommandLog(object)) )
+  logs = lapply( getCommands(object), function(x){
+    #setting the directory to the InputFilePath
+    currWD = getwd()
+    message( paste0("Executing command:\n", x) )
+    log = tryCatch({
+      if(!testing){
+        if(!useTee){
           setwd(getInFilePath(getCLIApplication(object = object)))
-          system(x, intern = TRUE)
+          cmdRes = system(x,intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+          return(cmdRes)
         } else{
-          message("Testing ... command is not executed!")
-          return(x)
+          setwd(getInFilePath(getCLIApplication(object = object)))
+          logFile = tempfile()
+          system(paste0(x," 2>&1 | tee ",logFile),intern = TRUE, ignore.stdout = FALSE, ignore.stderr = FALSE)
+          return( readLines(logFile) )
         }
-      }, warning = function(w){
-        warning(w)
-      }, error = function(e){
-        paste0("Error when executing code ", e)
-      }, finally = {
-        setwd( currWD )
-      })
-      return(log)
+      } else{
+        message("Testing ... command is not executed!")
+        return(x)
+      }
+    }, warning = function(w){
+      warning(w)
+    }, error = function(e){
+      paste0("Error when executing code ", e)
+    }, finally = {
+      setwd( currWD )
+    })
+    return(log)
   })
   return( CmdGenResultExec(cmdGenResult=object, execLog=logs))
 })
-
 

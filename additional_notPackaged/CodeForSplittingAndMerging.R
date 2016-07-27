@@ -1,8 +1,8 @@
 
 library(ClassSplitMergeHelper)
 
-pathToSplittedFiles = file.path(path.expand("~"),"RWorkspace/CLIHelperPackage/additional_notPackaged/splitted")
-pathToSingleFile = file.path(path.expand("~"),"RWorkspace/CLIHelperPackage/R/")
+pathToSplittedFiles = file.path(path.expand("~"),"workspace/R/gitprojects/CLIHelperPackage/additional_notPackaged/splitted")
+pathToSingleFile = file.path(path.expand("~"),"workspace/R/gitprojects/CLIHelperPackage/R/")
 
 
 

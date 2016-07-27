@@ -1,6 +1,6 @@
 #--split Bowtie2TophatIon_CLI
 
-#'@include Bowtie2_CLI
+#@include Bowtie2_CLI
 #'@title Bowtie2TophatIon_CLI
 #'@section Slots: 
 #'  \describe{

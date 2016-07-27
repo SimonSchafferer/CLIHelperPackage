@@ -5,7 +5,7 @@
 #     MUST BE PLACED AFTER Bowtie2TophatIon_CLI class!
 #################################################
 
-#'@include Samtools_CLI,Bowtie2Tophation_CLI
+#@include Samtools_CLI,Bowtie2Tophation_CLI
 #'@title Bowtie_CLI
 #'@section Slots: 
 #'  \describe{

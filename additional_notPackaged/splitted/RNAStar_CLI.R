@@ -1,6 +1,6 @@
 #--split RNAStar_CLI
 
-#'@include CLIApplication
+#@include CLIApplication
 #'@title RNAStar_CLI
 #'@section Slots: 
 #'  \describe{

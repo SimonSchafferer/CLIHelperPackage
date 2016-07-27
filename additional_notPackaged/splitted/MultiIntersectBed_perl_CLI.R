@@ -1,5 +1,5 @@
 #--split MultiIntersectBed_perl_CLI
-#'@include IntersectBed_CLI
+#@include IntersectBed_CLI
 #'@title MultiIntersectBed_perl_CLI
 #'@section Slots: 
 #'  \describe{

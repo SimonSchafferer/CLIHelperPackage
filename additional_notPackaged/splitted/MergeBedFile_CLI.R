@@ -1,5 +1,5 @@
 #--split MergeBedFile_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title MergeBedFile_CLI
 #'@section Slots: 
 #'  \describe{

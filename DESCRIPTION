@@ -11,3 +11,4 @@ Description: This package contains one class for each command line application
     created. Currently some applications are restricted to specific use cases,
     this will be changed in future versions
 License: MIT
+RoxygenNote: 5.0.1

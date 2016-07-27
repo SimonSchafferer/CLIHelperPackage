@@ -1,5 +1,5 @@
 #--split Cutadapt_CLI
-#'@include CLIApplication
+#@include CLIApplication
 #'@title Cutadapt_CLI
 #'@section Slots: 
 #'  \describe{
