@@ -87,7 +87,7 @@ if( scalar @groups != 0 ){
 	unless(open MERGED,'>', $mergedFN) {
 	       die "nUnable to open '$mergedFN'\n";
 	}
-	open (BED, "mergeBed -s -c 4,5,6 -o distinct,distinct,distinct -i $out_fn | sed -r 's/(\\s+)?\S+//4' $out_fn | ");
+	open (BED, "mergeBed -s -c 4,5,6 -o distinct,distinct,distinct -i $out_fn | sed -r 's/(\\s+)?\S+//4' $out_fn ");
 	while (<BED>) {
 		print MERGED;
 	}
